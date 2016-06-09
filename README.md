@@ -7,3 +7,6 @@ Make a copy of `config-sample.js` and fill it in with the proper information.
 
 ## Usage
 Run `npm install` and then `node main.js`.
+
+## Notes
+Even though this code is written with the BB-8 Sphero in mind, it should work with all Spheros supported by the JavaScript SDK
