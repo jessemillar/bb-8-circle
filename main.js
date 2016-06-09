@@ -10,7 +10,7 @@ var bb8 = sphero(config.BLE); // Configure your BB-8's BLE address in the config
 
 var circleInterval = 5000;
 
-notify("Hello there!");
+notify("hello", "Hello there!");
 
 // Check Circle every few seconds for recent build statuses
 setInterval(function() {
@@ -55,9 +55,9 @@ function checkCircle() {
                     console.log("Recent build found");
 
                     if (body[i].failed) {
-                        notify(body[i].reponame + "'s build failed!", body[i].build_url);
+                        notify("failure", body[i].reponame + "'s build failed!", body[i].build_url);
                     } else {
-                        notify(body[i].reponame + "'s build succeeded!", body[i].build_url);
+                        notify("success", body[i].reponame + "'s build succeeded!", body[i].build_url);
                     }
                 }
             }
@@ -65,13 +65,23 @@ function checkCircle() {
     });
 }
 
-function notify(message, url) {
+function notify(status, message, url) {
+    var icon = "images/icon.png";
+
+    if (status == "hello") {
+        icon = "images/icon-success.png";
+    } else if (status == "success") {
+        icon = "images/icon-success.png";
+    } else if (status == "failure") {
+        icon = "images/icon-failure.png";
+    }
+
     notifier.notify({
         title: "BB-8",
         message: message,
         open: url, // URL to open on click
         sender: " ",
-        icon: path.join(__dirname, "images/icon.png"),
+        icon: path.join(__dirname, icon),
         sound: false,
         wait: false // Wait with callback, until user action is taken against notification
     }, function(err, response) { // Response is the response from the notification
