@@ -19,18 +19,17 @@ setInterval(function() {
 
 console.log("Looking for BB-8...");
 
-var headPower = 7;
+var headPower = 100;
 var moveChance = 0.25;
 
 bb8.connect(function() {
     console.log("Found BB-8!");
+    flash("blue", 1000); // Flash BB-8's light so we know he's listening
 
-    // Flash BB-8's light so we know he's listening
-    bb8.color("purple");
-
-    setInterval(function() {
-        bb8.color("black"); // Blank BB-8's light
-    }, 1000);
+    bb8.streamImuAngles();
+    bb8.on("imuAngles", function(data) {
+        console.log(data);
+    });
 
     // Every so often, there's a certain chance he'll move his head
     setInterval(function() {
@@ -39,8 +38,89 @@ bb8.connect(function() {
             var direction = Math.floor(Math.random() * 360);
             bb8.roll(headPower, direction);
         }
-    }, 25000);
+    }, 10000);
 });
+
+function flash(color, duration) {
+    if (!duration) {
+        duration = 5000;
+    }
+
+    bb8.color(color);
+
+    setInterval(function() {
+        bb8.color("black"); // Blank BB-8's light
+    }, duration);
+}
+
+function headShake() {
+    bb8.roll(0, 45);
+    setTimeout(function() {
+        bb8.roll(0, 315);
+    }, 300);
+    setTimeout(function() {
+        bb8.roll(0, 45);
+    }, 600);
+    setTimeout(function() {
+        bb8.roll(0, 315);
+    }, 900);
+    setTimeout(function() {
+        bb8.roll(0, 45);
+    }, 1200);
+    setTimeout(function() {
+        bb8.roll(0, 315);
+    }, 1500);
+    setTimeout(function() {
+        bb8.roll(0, 0);
+    }, 1800);
+}
+
+function headNod() {
+    bb8.setRawMotors({
+        lmode: 2,
+        lpower: 80,
+        rmode: 2,
+        rpower: 80
+    });
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 1,
+            lpower: 80,
+            rmode: 1,
+            rpower: 80
+        });
+    }, 200);
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 2,
+            lpower: 80,
+            rmode: 2,
+            rpower: 80
+        });
+    }, 400);
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 1,
+            lpower: 80,
+            rmode: 1,
+            rpower: 80
+        });
+    }, 600);
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 0,
+            lpower: 0,
+            rmode: 0,
+            rpower: 0
+        });
+
+        bb8.setStabilization(1); // Turn stabilization back on in case BB-8 isn't in his dock
+    }, 800);
+}
 
 function checkCircle() {
     client.get("https://circleci.com/api/v1/recent-builds?circle-token=" + config.CircleToken, function(error, response, body) {
@@ -55,9 +135,13 @@ function checkCircle() {
                     console.log("Recent build found");
 
                     if (body[i].failed) {
-                        notify("failure", body[i].reponame + "'s build failed!", body[i].build_url);
+                        flash("red");
+                        headShake();
+                        notify("failure", body[i].reponame + "'s build of the " + body[i].branch + " branch failed!", body[i].build_url);
                     } else {
-                        notify("success", body[i].reponame + "'s build succeeded!", body[i].build_url);
+                        flash("green");
+                        headNod();
+                        notify("success", body[i].reponame + "'s build of the " + body[i].branch + " branch succeeded!", body[i].build_url);
                     }
                 }
             }
