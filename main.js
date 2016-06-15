@@ -19,7 +19,7 @@ setInterval(function() {
 
 console.log("Looking for BB-8...");
 
-var headPower = 100;
+var direction;
 var moveChance = 0.25;
 
 bb8.connect(function() {
@@ -30,14 +30,14 @@ bb8.connect(function() {
     setInterval(function() {
         if (Math.random() <= moveChance) {
             // Pick a random direction
-            var direction = Math.floor(Math.random() * 360);
-            bb8.roll(headPower, direction);
+            direction = Math.floor(Math.random() * 360);
+            bb8.roll(25, direction);
 
             setTimeout(function() {
                 bb8.roll(0, direction); // Stop rolling after moving head
             }, 350);
         }
-    }, 5000);
+    }, 3000);
 });
 
 function flash(color, duration) {
@@ -53,61 +53,86 @@ function flash(color, duration) {
 }
 
 function headShake() {
-    bb8.roll(0, 45);
+    var timeSpacing = 250;
+    var lowerBound = 45;
+    var upperBound = 315;
+
+    bb8.roll(motorPower, lowerBound);
     setTimeout(function() {
-        bb8.roll(0, 315);
-    }, 300);
+        bb8.roll(0, upperBound);
+    }, timeSpacing);
     setTimeout(function() {
-        bb8.roll(0, 45);
-    }, 600);
+        bb8.roll(0, lowerBound);
+    }, timeSpacing * 2);
     setTimeout(function() {
-        bb8.roll(0, 315);
-    }, 900);
+        bb8.roll(0, upperBound);
+    }, timeSpacing * 3);
     setTimeout(function() {
-        bb8.roll(0, 45);
-    }, 1200);
+        bb8.roll(0, lowerBound);
+    }, timeSpacing * 4);
     setTimeout(function() {
-        bb8.roll(0, 315);
-    }, 1500);
+        bb8.roll(0, upperBound);
+    }, timeSpacing * 5);
     setTimeout(function() {
-        bb8.roll(0, 0);
-    }, 1800);
+        bb8.roll(0, 0); // Stop rolling and rotating
+    }, timeSpacing * 6);
 }
 
 function headNod() {
+    var timeSpacing = 200;
+    var motorPower = 90;
+
     bb8.setRawMotors({
         lmode: 2,
-        lpower: 80,
+        lpower: motorPower,
         rmode: 2,
-        rpower: 80
+        rpower: motorPower
     });
 
     setTimeout(function() {
         bb8.setRawMotors({
             lmode: 1,
-            lpower: 80,
+            lpower: motorPower,
             rmode: 1,
-            rpower: 80
+            rpower: motorPower
         });
-    }, 200);
+    }, timeSpacing);
 
     setTimeout(function() {
         bb8.setRawMotors({
             lmode: 2,
-            lpower: 80,
+            lpower: motorPower,
             rmode: 2,
-            rpower: 80
+            rpower: motorPower
         });
-    }, 400);
+    }, timeSpacing * 2);
 
     setTimeout(function() {
         bb8.setRawMotors({
             lmode: 1,
-            lpower: 80,
+            lpower: motorPower,
             rmode: 1,
-            rpower: 80
+            rpower: motorPower
         });
-    }, 600);
+    }, timeSpacing * 3);
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 2,
+            lpower: motorPower,
+            rmode: 2,
+            rpower: motorPower
+        });
+    }, timeSpacing * 4);
+
+    setTimeout(function() {
+        bb8.setRawMotors({
+            lmode: 1,
+            lpower: motorPower,
+            rmode: 1,
+            rpower: motorPower
+        });
+    }, timeSpacing * 5);
 
     setTimeout(function() {
         bb8.setRawMotors({
@@ -118,7 +143,7 @@ function headNod() {
         });
 
         bb8.setStabilization(1); // Turn stabilization back on in case BB-8 isn't in his dock
-    }, 800);
+    }, timeSpacing * 6);
 }
 
 function checkCircle() {
@@ -134,12 +159,12 @@ function checkCircle() {
                     console.log("Recent build found");
 
                     if (body[i].failed) {
-                        flash("red");
                         headShake();
+                        flash("red");
                         notify("failure", body[i].reponame + "'s build of the " + body[i].branch + " branch failed!", body[i].build_url);
                     } else {
-                        flash("green");
                         headNod();
+                        flash("green");
                         notify("success", body[i].reponame + "'s build of the " + body[i].branch + " branch succeeded!", body[i].build_url);
                     }
                 }
