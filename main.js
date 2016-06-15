@@ -26,19 +26,18 @@ bb8.connect(function() {
     console.log("Found BB-8!");
     flash("blue", 1000); // Flash BB-8's light so we know he's listening
 
-    bb8.streamImuAngles();
-    bb8.on("imuAngles", function(data) {
-        console.log(data);
-    });
-
     // Every so often, there's a certain chance he'll move his head
     setInterval(function() {
         if (Math.random() <= moveChance) {
             // Pick a random direction
             var direction = Math.floor(Math.random() * 360);
             bb8.roll(headPower, direction);
+
+            setTimeout(function() {
+                bb8.roll(0, direction); // Stop rolling after moving head
+            }, 350);
         }
-    }, 10000);
+    }, 5000);
 });
 
 function flash(color, duration) {
