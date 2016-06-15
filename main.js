@@ -1,16 +1,20 @@
 var config = require("./config"); // Nab our settings file (make sure you make one based off of config-sample.js)
 var sphero = require("sphero"); // Get the main Sphero SDK module
 var notifier = require("node-notifier"); // Tie into desktop notifications
-var path = require('path');
-var exec = require('child_process').exec
-var request = require('request-json');
-var client = request.createClient('http://localhost:8888/');
+var path = require("path");
+var exec = require("child_process").exec
+var request = require("request-json");
+var player = require("play-sound")(opts = {}); // opts is important
+var client = request.createClient("http://localhost:8888/");
 
 var bb8 = sphero(config.BLE); // Configure your BB-8's BLE address in the config.js file
 
+var direction;
+var moveChance = 0.25;
 var circleInterval = 5000;
 
 notify("hello", "Hello there!");
+player.play("sounds/beep-beep.mp3");
 
 // Check Circle every few seconds for recent build statuses
 setInterval(function() {
@@ -18,9 +22,6 @@ setInterval(function() {
 }, circleInterval);
 
 console.log("Looking for BB-8...");
-
-var direction;
-var moveChance = 0.25;
 
 bb8.connect(function() {
     console.log("Found BB-8!");
@@ -146,6 +147,18 @@ function headNod() {
     }, timeSpacing * 6);
 }
 
+function buildFailed() {
+    headShake();
+    flash("red");
+    player.play("sounds/uh-oh.mp3");
+}
+
+function buildSuceeded() {
+    headNod();
+    flash("green");
+    player.play("sounds/he-he.mp3");
+}
+
 function checkCircle() {
     client.get("https://circleci.com/api/v1/recent-builds?circle-token=" + config.CircleToken, function(error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -159,12 +172,10 @@ function checkCircle() {
                     console.log("Recent build found");
 
                     if (body[i].failed) {
-                        headShake();
-                        flash("red");
+                        buildFailed();
                         notify("failure", body[i].reponame + "'s build of the " + body[i].branch + " branch failed!", body[i].build_url);
                     } else {
-                        headNod();
-                        flash("green");
+                        buildSuceeded();
                         notify("success", body[i].reponame + "'s build of the " + body[i].branch + " branch succeeded!", body[i].build_url);
                     }
                 }
