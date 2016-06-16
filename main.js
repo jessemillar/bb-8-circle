@@ -23,7 +23,7 @@ var quotes = [{
     quote: "Beo-beo!",
     sound: "sounds/beo-beo.mp3"
 }, {
-    quote: "Boh-bu bobo",
+    quote: "Boh-bu bobo.",
     sound: "sounds/boh-bubobo.mp3"
 }, {
     quote: "He he!",
