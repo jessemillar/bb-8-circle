@@ -34,7 +34,7 @@ var quotes = [{
 }];
 
 notify("hello", quotes[0].quote); // Say hello on start
-player.play(quotes[4].sound); // Play a happy sound
+player.play(quotes[0].sound); // Play a happy sound
 
 // Check Circle every few seconds for recent build statuses
 var circleTimer = setInterval(function() {
