@@ -1,25 +1,49 @@
 var config = require("./config"); // Nab our settings file (make sure you make one based off of config-sample.js)
 var sphero = require("sphero"); // Get the main Sphero SDK module
 var notifier = require("node-notifier"); // Tie into desktop notifications
-var path = require("path");
-var exec = require("child_process").exec
-var request = require("request-json");
-var player = require("play-sound")(opts = {}); // opts is important
-var client = request.createClient("http://localhost:8888/");
+var path = require("path"); // Allow access to files on the local filesystem
+var exec = require("child_process").exec; // Used to open Chrome on notification click
+var player = require("play-sound")(opts = {}); // `opts` is important
+var request = require("request-json"); // Checks Circle via the Circl API
+var client = request.createClient("http://localhost:8888/"); // Actually checks Circle
 
 var bb8 = sphero(config.BLE); // Configure your BB-8's BLE address in the config.js file
 
 var direction;
-var moveChance = 0.25;
-var circleInterval = 5000;
+var lookChance = 0.25; // The percentage chance that BB-8 will look somewhere new
+var lookInterval = 1000; // How often to look around
+var circleInterval = 5000; // How often to check Circle for new builds
+var babbleChance = 0.1;
+var babbleInterval = 10000; // How often to possibly say a random phrase
 
-notify("hello", "Hello there!");
-player.play("sounds/beep-beep.mp3");
+var quotes = [{
+    quote: "Boh boh boh buh bee-beep!",
+    sound: "sounds/beep-beep.mp3"
+}, {
+    quote: "Beo-beo!",
+    sound: "sounds/beo-beo.mp3"
+}, {
+    quote: "Boh-bu bobo",
+    sound: "sounds/boh-bubobo.mp3"
+}, {
+    quote: "He he!",
+    sound: "sounds/he-he.mp3"
+}, {
+    quote: "Uh oh...",
+    sound: "sounds/uh-oh.mp3"
+}];
+
+notify("hello", quotes[0].quote); // Say hello on start
+player.play(quotes[4].sound); // Play a happy sound
 
 // Check Circle every few seconds for recent build statuses
-setInterval(function() {
+var circleTimer = setInterval(function() {
     checkCircle();
 }, circleInterval);
+
+var babbleTimer = setInterval(function() {
+    babble();
+}, babbleInterval);
 
 console.log("Looking for BB-8...");
 
@@ -27,19 +51,28 @@ bb8.connect(function() {
     console.log("Found BB-8!");
     flash("blue", 1000); // Flash BB-8's light so we know he's listening
 
-    // Every so often, there's a certain chance he'll move his head
-    setInterval(function() {
-        if (Math.random() <= moveChance) {
+    // Every so often, there's a certain chance BB-8 will move his head
+    var lookTimer = setInterval(function() {
+        if (Math.random() <= lookChance) {
             // Pick a random direction
             direction = Math.floor(Math.random() * 360);
             bb8.roll(25, direction);
 
-            setTimeout(function() {
+            var lookStopTimer = setTimeout(function() {
                 bb8.roll(0, direction); // Stop rolling after moving head
             }, 350);
         }
-    }, 3000);
+    }, lookInterval);
 });
+
+function babble() {
+    if (Math.random() <= babbleChance) {
+        var random = Math.floor(Math.random() * quotes.length);
+
+        notify("hello", quotes[random].quote);
+        player.play(quotes[random].sound);
+    }
+}
 
 function flash(color, duration) {
     if (!duration) {
@@ -48,7 +81,7 @@ function flash(color, duration) {
 
     bb8.color(color);
 
-    setInterval(function() {
+    var lightTimer = setInterval(function() {
         bb8.color("black"); // Blank BB-8's light
     }, duration);
 }
@@ -59,22 +92,28 @@ function headShake() {
     var upperBound = 315;
 
     bb8.roll(motorPower, lowerBound);
-    setTimeout(function() {
+
+    var shakeTimer1 = setTimeout(function() {
         bb8.roll(0, upperBound);
     }, timeSpacing);
-    setTimeout(function() {
+
+    var shakeTimer2 = setTimeout(function() {
         bb8.roll(0, lowerBound);
     }, timeSpacing * 2);
-    setTimeout(function() {
+
+    var shakeTimer3 = setTimeout(function() {
         bb8.roll(0, upperBound);
     }, timeSpacing * 3);
-    setTimeout(function() {
+
+    var shakeTimer4 = setTimeout(function() {
         bb8.roll(0, lowerBound);
     }, timeSpacing * 4);
-    setTimeout(function() {
+
+    var shakeTimer5 = setTimeout(function() {
         bb8.roll(0, upperBound);
     }, timeSpacing * 5);
-    setTimeout(function() {
+
+    var shakeTimer6 = setTimeout(function() {
         bb8.roll(0, 0); // Stop rolling and rotating
     }, timeSpacing * 6);
 }
@@ -90,7 +129,7 @@ function headNod() {
         rpower: motorPower
     });
 
-    setTimeout(function() {
+    var nodTimer1 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 1,
             lpower: motorPower,
@@ -99,7 +138,7 @@ function headNod() {
         });
     }, timeSpacing);
 
-    setTimeout(function() {
+    var nodTimer2 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 2,
             lpower: motorPower,
@@ -108,7 +147,7 @@ function headNod() {
         });
     }, timeSpacing * 2);
 
-    setTimeout(function() {
+    var nodTimer3 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 1,
             lpower: motorPower,
@@ -117,7 +156,7 @@ function headNod() {
         });
     }, timeSpacing * 3);
 
-    setTimeout(function() {
+    var nodTimer4 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 2,
             lpower: motorPower,
@@ -126,7 +165,7 @@ function headNod() {
         });
     }, timeSpacing * 4);
 
-    setTimeout(function() {
+    var nodTimer5 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 1,
             lpower: motorPower,
@@ -135,7 +174,7 @@ function headNod() {
         });
     }, timeSpacing * 5);
 
-    setTimeout(function() {
+    var nodTimer6 = setTimeout(function() {
         bb8.setRawMotors({
             lmode: 0,
             lpower: 0,
