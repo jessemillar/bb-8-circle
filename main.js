@@ -10,7 +10,7 @@ var client = request.createClient("http://localhost:8888/"); // Actually checks 
 var bb8 = sphero(config.BLE); // Configure your BB-8's BLE address in the config.js file
 
 var direction;
-var lookChance = 0.25; // The percentage chance that BB-8 will look somewhere new
+var lookChance = 0.2; // The percentage chance that BB-8 will look somewhere new
 var lookInterval = 1000; // How often to look around
 var circleInterval = 5000; // How often to check Circle for new builds
 var babbleChance = 0.1;
@@ -88,7 +88,7 @@ function headShake() {
     var lowerBound = 45;
     var upperBound = 315;
 
-    bb8.roll(motorPower, lowerBound);
+    bb8.roll(0, lowerBound);
 
     var shakeTimer1 = setTimeout(function() {
         bb8.roll(0, upperBound);
