@@ -14,7 +14,7 @@ var lookChance = 0.2; // The percentage chance that BB-8 will look somewhere new
 var lookInterval = 1000; // How often to look around
 var circleInterval = 5000; // How often to check Circle for new builds
 var babbleChance = 0.1;
-var babbleInterval = 25000; // How often to possibly say a random phrase
+var babbleInterval = 15000; // How often to possibly say a random phrase
 
 var quotes = [{
     quote: "Boh boh boh buh bee-beep!",
