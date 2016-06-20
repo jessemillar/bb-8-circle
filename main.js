@@ -66,7 +66,6 @@ function babble() {
     if (Math.random() <= babbleChance) {
         var random = Math.floor(Math.random() * quotes.length);
 
-        notify("hello", quotes[random].quote);
         player.play(quotes[random].sound);
     }
 }
