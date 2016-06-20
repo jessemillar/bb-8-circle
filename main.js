@@ -11,7 +11,7 @@ var bb8 = sphero(config.BLE); // Configure your BB-8's BLE address in the config
 
 var direction;
 var lookChance = 0.2; // The percentage chance that BB-8 will look somewhere new
-var lookInterval = 1000; // How often to look around
+var lookInterval = 1500; // How often to look around
 var circleInterval = 5000; // How often to check Circle for new builds
 var babbleChance = 0.1;
 var babbleInterval = 15000; // How often to possibly say a random phrase
